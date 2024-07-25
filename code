@@ -1,0 +1,58 @@
+const int switchPin = 7;  
+const int r1 = 50; 
+const int r2 = 40;  
+
+int y1 = 0;
+int y2 = 0;
+int increment = 2;
+int decrement = 1;
+bool switchState = LOW;
+unsigned long previousMillisIncrement = 0;
+unsigned long previousMillisDecrement = 0;
+const long intervalIncrement = 3000;  
+const long intervalDecrement = 2000; 
+
+void setup() {
+  pinMode(switchPin, OUTPUT);
+  Serial.begin(9600);
+  switchState = HIGH;
+  digitalWrite(switchPin, HIGH);
+  Serial.println("Program started");
+  Serial.println("R1 has been selected");
+  Serial.println("R2 has been selected");
+  Serial.println("Switch ON");
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  
+  if (switchState == HIGH && currentMillis - previousMillisIncrement >= intervalIncrement) {
+    previousMillisIncrement = currentMillis;
+    y1 += increment;
+    y2 += increment;
+    Serial.print("power supply R1-A: "); Serial.println(y1);
+    Serial.print("power supply R2-A: "); Serial.println(y2);
+  }
+
+  if (y1 > r1 || y2 > r2) {
+    switchState = LOW;
+    digitalWrite(switchPin, LOW);
+    Serial.println("Switch OFF");
+  }
+
+  
+  if (switchState == LOW && currentMillis - previousMillisDecrement >= intervalDecrement) {
+    previousMillisDecrement = currentMillis;
+    if (y1 > 0) y1 -= decrement;
+    if (y2 > 0) y2 -= decrement;
+    Serial.print("Cooling down Power R1-A: "); Serial.println(y1);
+    Serial.print("Cooling down Power R2-A: "); Serial.println(y2);
+    
+    // Check if Y1 and Y2 are below their respective thresholds minus 30
+    if (y1 <= r1 - 10 && y2 <= r2 - 10) {
+      switchState = HIGH;
+      digitalWrite(switchPin, HIGH);
+      Serial.println("Switch ON after cooling down");
+    }
+  }
+}
